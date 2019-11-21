@@ -112,24 +112,39 @@ def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Dela
     Server_Address2 = (IP_LIST[1],PORT)
     Server_Address3 = (IP_LIST[2],PORT)
 
+    sock.listen(5) #Listen for up to 5 clients, I think?
+    Tcheck = time.time()
+    SeverProbe(IP_LIST)
+
     while (TRUE) #Loop for connections
-        print("Waiting to hear from Client...")
-        connection_object, client_address = sock.accept() #accept connection from a client, log the connection
-        Log("Connection to" client_address)
+        #Now = time.time()
+        if(time.time() - Tcheck) >= 150     #Checks to see if 150 seconds have passed since last server probe
+            SeverProbe(IP_LIST)         #150 seconds have passed, run server probe
+            Tcheck = time.time()        #keep track of last probe for next loop
+
+        try:
+            print("Waiting to hear from Client...")
+            connection_object, client_address = sock.accept() #accept connection from a client, log the connection
+            Log("Connection to" client_address)
+            head = connection_object.recv(8)    #recieve hello message(Hopefullly) From the client
+            header=struct.unpack('>ii',head)
+            data_from_client = connection_object.recv(8)
+            if header[0]!=0:    #Check for syn bit, to be sure this is a greeting, if it isnt, no more to be done
+                connection_object.close()
+                continue
+            elif header[1]==1   #Check for FIN flag, close connection if true
+                connection_object.close()
+                continue
+                #Client has been confirmed, now need to send webpage from current prefered server
 
 
 
 
-    while(TRUE) #Loop to do the server probe periodically, Might block everything else from happening, need to test
-        SeverProbe(IP_LIST)
-        time.sleep(3)
+        except Keyboardinterrupt: #Use keyboard interupt to close the program
+            connection_object.close()
 
 
-
-
-
-
-
+sock.close()
 #do pings with given servers, create list ranked on performance(1 = lowest delay&loss)(.75*loss %+.25*delay %(in ms))
 #Accept incoming clients, do handskahe and whatnot
 #Connect client to server whth lowest prefrence(the best one)
