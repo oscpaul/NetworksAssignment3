@@ -30,7 +30,7 @@ def Log(FileLoc,Msg)
         return
 
     LogFile.write("\n")
-    LogFile.write(Info)
+    LogFile.write(Msg)
     LogFile.close()
     return;
 
@@ -47,14 +47,16 @@ Log(logFileLoc,"Sending request for page")
 
 #from here on, client should just recieve the webpage and then close the connection
 file = open('recievedpage.txt',rb)
-l=file.read(1024)
-Log(logFlieLoc,"Recieving Page")
-while(l)
-    s.send(l)
-    l=file.read(1024)
-file.close
+l = sock.recv(1024)
+while(l):
+    file.write(l)
+    l=sock.recv(1024)
+    if not l:
+        break
+
+file.close()
 
 Log(logFileLoc,"Recieved page")
-Send(1,0,GoodBye)   #Send FIN message before closing socket
+Send(1,0,'Goodbye')   #Send FIN message before closing socket
 
 sock.close()
