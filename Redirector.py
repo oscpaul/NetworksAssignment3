@@ -23,12 +23,12 @@ LOGFILE=args.LOGFILE
 PrefList = [[0 for x in range (3)] for y in range(ServerNum-1)] #creates array for Prefrences used with(PrefList[0=ServerNum,1=Loss,2=Delay,3=Preference][ServerNum(0-2)])
 while(Temp<(ServerNum-1)): #Loop to fill first column with Server Numbers
     PrefList[0][ServerNum] = "Server"+ServerNum
-    Temp++
+    Temp += 1
 
 PrefServer=0
 Temp = 0
 #Define Functions
-def Log(ClientIp,URL,ServerIp,PrefList)
+def Log(ClientIp,URL,ServerIp,PrefList):
     try:
         Log=open(LOGFILE,"a+")
     except:
@@ -38,7 +38,7 @@ def Log(ClientIp,URL,ServerIp,PrefList)
     Log.write("\n")
 
 
-def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Delay, returns new preference list
+def ServerProbe(IP_LIST): #Sends UDP Packets to servers, keeps track of loss&Delay, returns new preference list
     #Need to split IP_LIST into Server1,2,3
     Server0 = IP_List[0]
     Server1 = IP_List[1]
@@ -55,13 +55,13 @@ def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Dela
                 try:
                     Msg,Addr = UDPSock.recvfrom(1024)
                     RecvTime+=(time.time()-SendTime)
-                    Ping++
+                    Ping += 1
                 except socket.timeout:  #If packet times out, add one to counter and try again
-                    TLost++
+                    TLost += 1
         PrefList[1][Temp] = TLost  #After 3 pings sent, record data for that server
         PrefList[2][Temp] = (RecvTime/3)   #average time of all three succesful pings is recorded
         TLost=0
-        Temp++
+        Temp += 1
     #Need to Assign PrefList[3][] After all pings are Sent
     #Temp=0
     #while(Temp<(ServerNum-1)) #calculate preference using: Preference = 0.75*loss percentage + 0.25*delay in milliseconds, Want lowest value.
@@ -103,7 +103,7 @@ def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Dela
             PrefList[3][1] = 2
             PrefList[3][0] = 3
 
-def Send(FIN,SYN,Message)       #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
+def Send(FIN,SYN,Message):     #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
     Header=struct.pack('>ii',FIN,SYN)
     M=struct.pack('>8s',str.encode(Message)) #packets will include a message if one needs to be sent, usually blank and/or discarded
 
@@ -161,7 +161,7 @@ while(TRUE): #Loop to keep listening indefinetly
                     break
                 sock.send(forwardData)
 
-            Log()
+            ;Log()
 
 
             Send(1,0,"Bye")#Send FIN to server, then close connection
