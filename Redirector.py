@@ -52,12 +52,12 @@ def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Dela
         while(Ping < 3):
             SendTime = time.time() #Saves the start time
             UDPSock.sendto("PING"((Server+Temp),PORT))
-                try:
-                    Msg,Addr = UDPSock.recvfrom(1024)
-                    RecvTime+=(time.time()-SendTime)
-                    Ping++
-                except socket.timeout:  #If packet times out, add one to counter and try again
-                    TLost++
+            try:
+                Msg,Addr = UDPSock.recvfrom(1024)
+                RecvTime+=(time.time()-SendTime)
+                Ping++
+            except socket.timeout:  #If packet times out, add one to counter and try again
+                TLost++
         PrefList[1][Temp] = TLost  #After 3 pings sent, record data for that server
         PrefList[2][Temp] = (RecvTime/3)   #average time of all three succesful pings is recorded
         TLost=0
