@@ -24,7 +24,7 @@ server_address_object = ('10.128.0.3',PORT)
 print("address = ", server_address_object)
 sock.bind(server_address_object) #Bind server to the given socket and itself as the server
 
-def Log(FileLoc,Msg)
+def Log(FileLoc,Msg):
     try:
         LogFile=open(FileLoc,"a+")
     except:
@@ -36,7 +36,7 @@ def Log(FileLoc,Msg)
     LogFile.close()
     return;
 
-def Send(FIN,SYN,Message)       #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
+def Send(FIN,SYN,Message):       #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
     Header=struct.pack('>ii',FIN,SYN)       #used only for hello and FIN packets
     M=struct.pack('>8s',str.encode(Message)) #packets will include a message if one needs to be sent, usually blank and/or discarded
 
