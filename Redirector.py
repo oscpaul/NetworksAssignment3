@@ -16,7 +16,7 @@ InParser.add_argument('LOGFILE',action='store',help='Logfile Location')
 
 args=InParser.parse_args()
 
-IP_List=args.IP_List
+IP_List=args.IP_LIST
 PORT=args.PORT
 LOGFILE=args.LOGFILE
 
@@ -129,7 +129,7 @@ while(TRUE): #Loop to keep listening indefinetly
     Tcheck = time.time()
     SeverProbe(IP_LIST)
 
-    while (loop=TRUE): #Loop for connections
+    while (loop==TRUE): #Loop for connections
         #Now = time.time()
         if(time.time() - Tcheck) >= 150:     #Checks to see if 150 seconds have passed since last server probe
             SeverProbe(IP_LIST)         #150 seconds have passed, run server probe
@@ -138,7 +138,7 @@ while(TRUE): #Loop to keep listening indefinetly
         try:
             print("Waiting to hear from Client...")
             connection_object, client_address = sock.accept() #accept connection from a client, log the connection
-            Log("Connection to" client_address)
+            #Log("Connection to" client_address)
             head = connection_object.recv(8)    #recieve hello message(Hopefullly) From the client
             header=struct.unpack('>ii',head)
             data_from_client = connection_object.recv(8)
@@ -155,13 +155,13 @@ while(TRUE): #Loop to keep listening indefinetly
             Send(0,1,"Hello") #Send Message to server, server should recieve this and start sending webpage
 
             #Here, server should be sending packets of html webpage, they need to be recv() and the immeadeatly sock.sent to the client
-            While True:
+            while(TRUE):
                 forwardData = ServerSock.recv(1024)
                 if not forwardData:
                     break
                 sock.send(forwardData)
 
-            ;Log()
+            #Log()
 
 
             Send(1,0,"Bye")#Send FIN to server, then close connection
