@@ -22,7 +22,7 @@ server_address=(LBIP,Port)
 print("Connecting to...", server_address)
 sock.connect(server_address) #Connects to the server using the given port and IP address
 
-def Log(FileLoc,Msg)
+def Log(FileLoc,Msg):
     try:
         LogFile=open(FileLoc,"a+")
     except:
@@ -34,7 +34,7 @@ def Log(FileLoc,Msg)
     LogFile.close()
     return;
 
-def Send(FIN,SYN,Message)       #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
+def Send(FIN,SYN,Message):       #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
     Header=struct.pack('>ii',FIN,SYN)
     M=struct.pack('>8s',str.encode(Message)) #packets will include a message if one needs to be sent, usually blank and/or discarded
 

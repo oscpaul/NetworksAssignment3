@@ -16,29 +16,31 @@ InParser.add_argument('LOGFILE',action='store',help='Logfile Location')
 
 args=InParser.parse_args()
 
-IP_List=args.IP_List
+IP_List=args.IP_LIST
 PORT=args.PORT
 LOGFILE=args.LOGFILE
 
 PrefList = [[0 for x in range (3)] for y in range(ServerNum-1)] #creates array for Prefrences used with(PrefList[0=ServerNum,1=Loss,2=Delay,3=Preference][ServerNum(0-2)])
 while(Temp<(ServerNum-1)): #Loop to fill first column with Server Numbers
     PrefList[0][ServerNum] = "Server"+ServerNum
-    Temp++
+    Temp += 1
 
 PrefServer=0
 Temp = 0
 #Define Functions
-def Log(ClientIp,URL,ServerIp,PrefList)
+def Log(LogFile,Msg):
     try:
-        Log=open(LOGFILE,"a+")
+        Log=open(LogFile,"a+")
     except:
         print("File not Found or Inacessible")
         return
 
     Log.write("\n")
+    Log.write(Msg)
+    Log.close()
 
 
-def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Delay, returns new preference list
+def ServerProbe(IP_LIST): #Sends UDP Packets to servers, keeps track of loss&Delay, returns new preference list
     #Need to split IP_LIST into Server1,2,3
     Server0 = IP_List[0]
     Server1 = IP_List[1]
@@ -55,13 +57,19 @@ def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Dela
             try:
                 Msg,Addr = UDPSock.recvfrom(1024)
                 RecvTime+=(time.time()-SendTime)
+<<<<<<< HEAD
                 Ping++
             except socket.timeout:  #If packet times out, add one to counter and try again
                 TLost++
+=======
+                Ping += 1
+            except socket.timeout:  #If packet times out, add one to counter and try again
+                TLost += 1
+>>>>>>> 7190ba99ed3cfb0aeb6c8d8fbb6f069a38e39a9f
         PrefList[1][Temp] = TLost  #After 3 pings sent, record data for that server
         PrefList[2][Temp] = (RecvTime/3)   #average time of all three succesful pings is recorded
         TLost=0
-        Temp++
+        Temp += 1
     #Need to Assign PrefList[3][] After all pings are Sent
     #Temp=0
     #while(Temp<(ServerNum-1)) #calculate preference using: Preference = 0.75*loss percentage + 0.25*delay in milliseconds, Want lowest value.
@@ -103,7 +111,7 @@ def ServerProbe(IP_LIST) #Sends UDP Packets to servers, keeps track of loss&Dela
             PrefList[3][1] = 2
             PrefList[3][0] = 3
 
-def Send(FIN,SYN,Message)       #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
+def Send(FIN,SYN,Message):     #Client packets will include syn for initial send, or fin to close TCP connetion. 1=TRUE 0=FALSE
     Header=struct.pack('>ii',FIN,SYN)
     M=struct.pack('>8s',str.encode(Message)) #packets will include a message if one needs to be sent, usually blank and/or discarded
 
@@ -129,7 +137,7 @@ while(TRUE): #Loop to keep listening indefinetly
     Tcheck = time.time()
     SeverProbe(IP_LIST)
 
-    while (loop=TRUE): #Loop for connections
+    while (loop==TRUE): #Loop for connections
         #Now = time.time()
         if(time.time() - Tcheck) >= 150:     #Checks to see if 150 seconds have passed since last server probe
             SeverProbe(IP_LIST)         #150 seconds have passed, run server probe
@@ -138,7 +146,7 @@ while(TRUE): #Loop to keep listening indefinetly
         try:
             print("Waiting to hear from Client...")
             connection_object, client_address = sock.accept() #accept connection from a client, log the connection
-            Log("Connection to" client_address)
+            Log(LOGFILE,"Connection to" client_address)
             head = connection_object.recv(8)    #recieve hello message(Hopefullly) From the client
             header=struct.unpack('>ii',head)
             data_from_client = connection_object.recv(8)
@@ -149,19 +157,20 @@ while(TRUE): #Loop to keep listening indefinetly
                 connection_object.close()
                 continue
                 #Client has been confirmed, now need to send webpage from current prefered server
-
+            Log(LOGFILE,"Request from {} for {}. Redirecting to {}, Preference, {}, Next preference was {} to {}."format(client_address,"url",PrefServer,"1","2","3"))
+                
             #Start by creating connection with Prefered Server
             ServerSock.connect(PrefServer,PORT)
             Send(0,1,"Hello") #Send Message to server, server should recieve this and start sending webpage
-
+            Log(LOGFILE,"Response from {}, Sending data to {}"format(PrefServer,client_address))
             #Here, server should be sending packets of html webpage, they need to be recv() and the immeadeatly sock.sent to the client
-            While True:
+            while(TRUE):
                 forwardData = ServerSock.recv(1024)
                 if not forwardData:
                     break
                 sock.send(forwardData)
 
-            Log()
+            #Log()
 
 
             Send(1,0,"Bye")#Send FIN to server, then close connection
