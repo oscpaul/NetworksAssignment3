@@ -28,14 +28,16 @@ while(Temp<(ServerNum-1)): #Loop to fill first column with Server Numbers
 PrefServer=0
 Temp = 0
 #Define Functions
-def Log(ClientIp,URL,ServerIp,PrefList):
+def Log(LogFile,Msg):
     try:
-        Log=open(LOGFILE,"a+")
+        Log=open(LogFile,"a+")
     except:
         print("File not Found or Inacessible")
         return
 
     Log.write("\n")
+    Log.write(Msg)
+    Log.close()
 
 
 def ServerProbe(IP_LIST): #Sends UDP Packets to servers, keeps track of loss&Delay, returns new preference list
@@ -138,7 +140,7 @@ while(TRUE): #Loop to keep listening indefinetly
         try:
             print("Waiting to hear from Client...")
             connection_object, client_address = sock.accept() #accept connection from a client, log the connection
-            #Log("Connection to" client_address)
+            Log(LOGFILE,"Connection to" client_address)
             head = connection_object.recv(8)    #recieve hello message(Hopefullly) From the client
             header=struct.unpack('>ii',head)
             data_from_client = connection_object.recv(8)
@@ -149,11 +151,12 @@ while(TRUE): #Loop to keep listening indefinetly
                 connection_object.close()
                 continue
                 #Client has been confirmed, now need to send webpage from current prefered server
-
+            Log(LOGFILE,"Request from {} for {}. Redirecting to {}, Preference, {}, Next preference was {} to {}."format(client_address,"url",PrefServer,"1","2","3"))
+                
             #Start by creating connection with Prefered Server
             ServerSock.connect(PrefServer,PORT)
             Send(0,1,"Hello") #Send Message to server, server should recieve this and start sending webpage
-
+            Log(LOGFILE,"Response from {}, Sending data to {}"format(PrefServer,client_address))
             #Here, server should be sending packets of html webpage, they need to be recv() and the immeadeatly sock.sent to the client
             while(TRUE):
                 forwardData = ServerSock.recv(1024)
